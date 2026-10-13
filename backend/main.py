@@ -139,7 +139,25 @@ async def device_poll(body: DevicePoll) -> dict[str, Any]:
             data={"client_id": CLIENT_ID, "device_code": body.device_code, "grant_type": "urn:ietf:params:oauth:grant-type:device_code"},
             headers={"Accept": "application/json"},
         )
+    
+try:
     data = response.json()
+except ValueError:
+    body_preview = (response.text or "")[:500]
+    print(
+        "[GitHub device_poll] Respuesta no JSON: "
+        f"status={response.status_code}, "
+        f"body={body_preview!r}"
+    )
+    raise HTTPException(
+        status_code=502,
+        detail=(
+            "GitHub devolvió una respuesta no válida "
+            f"(HTTP {response.status_code}). "
+            "Revisar los logs del backend."
+        ),
+    )
+
     if "error" in data:
         err = data.get("error")
         if err in ("authorization_pending", "slow_down"):
