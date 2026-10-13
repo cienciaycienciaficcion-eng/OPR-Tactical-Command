@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "owner": {
+    "github_id": "335606230",
+    "login": "cienciaycienciaficcion-eng"
+  },
+  "name": "Ejército de prueba",
+  "uploaded_at": "20261013T142226Z",
+  "army": {
+    "id": "test-opr-001",
+    "faction": "Test",
+    "units": []
+  }
+}
