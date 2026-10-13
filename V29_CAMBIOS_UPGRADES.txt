@@ -1,0 +1,72 @@
+OPR OFFLINE APP V29 — LOGICA DE UPGRADES
+
+CORRECCIONES PRINCIPALES
+
+1. EQUIPAMIENTO ACTUAL
+- Las mejoras ya no se muestran solamente como texto separado.
+- La tarjeta de cada unidad calcula el armamento actual a partir del equipamiento base + mejoras.
+- Los reemplazos eliminan el armamento objetivo y agregan las armas ganadas.
+- Replace all multiplica correctamente las armas ganadas por la cantidad de modelos afectados.
+- Las mejoras Upgrade/Attachment agregan sus gains sin eliminar el arma objetivo, porque no son reemplazos.
+- Los ArmyBookItem ganados por mejoras también se muestran como equipo adicional.
+
+2. VALIDACION DE UPGRADES
+Se creó src/utils/oprUpgrades.ts como motor común para Ejércitos y Campañas.
+
+Soporta:
+- Replace one / exactly X
+- Replace any
+- Replace all
+- Replace up to X
+- Upgrade with
+- Upgrade with one
+- Upgrade with any
+- Upgrade with up to X
+- Upgrade one/any/all models
+- combinaciones de affects + select
+- attachments con targets
+- targets múltiples (ej. Rifle + CCW)
+- targets con cantidad (ej. 2x Heavy Fist)
+- costes específicos por unidad (costs[].unitId)
+
+3. DEPENDENCIAS ENTRE MEJORAS
+- Una sustitución solo está disponible si la unidad conserva el armamento requerido.
+- Después de Replace one Rifle and CCW, queda un Rifle y un CCW menos por selección.
+- Si se consumen todos los objetivos, las mejoras posteriores que dependan de ellos quedan bloqueadas.
+- Ejemplo: Replace one Rifle and CCW -> se habilitan las opciones posteriores que requieren Sgt. Pistol / Plasma Sword solamente cuando esas armas realmente existen.
+- Las opciones de una misma sección respetan sus límites de selección.
+- select up to X permite repetir una misma opción, según las reglas de OPR.
+- select any permite opciones múltiples, pero no repite la misma opción cuando la sección no tiene una capacidad de modelos que lo permita.
+
+4. CAMPAÑA
+- Se utiliza exactamente el mismo motor de validación que Ejércitos.
+- Se conserva el coste de campaña/tesorería.
+- No se puede comprar una mejora que no sea legal para el equipamiento actual.
+- Al comprar/vender una mejora se recalcula weaponsActuales.
+- La importación Army Forge de campaña recupera la metadata completa de la sección de mejora.
+
+5. IMPORTACION
+- Las mejoras importadas se enriquecen con la sección local del manual cuando se encuentra por UID/ID/nombre.
+- Se conservan targets, affects, select, variant y gains.
+- También se recuperan desde unitSnapshot cuando el JSON proviene de OPR Offline.
+
+VALIDACION ESTATICA REALIZADA
+- 47 facciones locales
+- 1.058 unidades
+- 2.630 secciones de upgrade analizadas
+- 0 referencias de paquetes inexistentes
+- 0 errores de ejecución en prueba automática de las 2.630 secciones con datos sintéticos
+- armyroster.tsx: transpila correctamente
+- campana.tsx: transpila correctamente
+- oprUpgrades.ts: transpila correctamente
+
+NOTA
+La validación estática no sustituye una prueba visual en Expo Web/Android. Se recomienda probar especialmente:
+- Replace one Rifle and CCW
+- Replace all X
+- Replace up to X
+- Upgrade with any
+- Upgrade all models with one
+- Attachments
+- mejoras con coste negativo
+- venta de mejoras en Campaña

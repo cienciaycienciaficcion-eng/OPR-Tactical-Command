@@ -1,0 +1,6 @@
+V26 - FIX UTILIDADES EXPO WEB
+
+- Eliminada dependencia directa de File de expo-file-system en utilidades.tsx para evitar fallos de carga del módulo en web.
+- Importación JSON del Battle Companion usa fetch(uri).text(), compatible con URI blob de DocumentPicker en web.
+- BackHandler solo se registra en Android/iOS; en web no se intenta registrar hardwareBackPress.
+- Se mantiene el contenido completo de Utilidades: Dados, Generador de escenarios, Registro de batalla y Battle Companion.

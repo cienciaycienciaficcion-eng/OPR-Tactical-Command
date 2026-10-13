@@ -1,0 +1,11 @@
+V38 - GitHub OAuth y sincronización central
+
+- Se reemplazó el campo de token personal por inicio de sesión GitHub OAuth Device Flow.
+- El Client ID público se configura desde la pantalla de cuenta; no se incluye Client Secret.
+- El token de acceso se guarda en expo-secure-store en Android y puede eliminarse con Cerrar sesión.
+- El repositorio central predeterminado es cienciaycienciaficcion-eng/OPR-Tactical-Command.
+- Los ejércitos se guardan en ejércitos/ como JSON compatible con el importador.
+- Los reportes de Battle Companion se guardan individualmente en batallas/AAAA/ y se agregan a batallas/historial-general.json.
+- Se añadió descarga/mezcla del historial remoto con el historial local.
+- Requiere configurar una OAuth App con Device Flow y otorgar permisos de escritura en el repositorio a cada usuario.
+- No se añadió un backend; no se incluyen credenciales de escritura compartidas.

@@ -1,0 +1,13 @@
+V37 - Battle Companion
+
+- Activaciones simultaneas visibles y registrables.
+- Permite seleccionar varios grupos para una activacion simultanea cuando la habilidad/regla lo permite.
+- Respeta el limite de grupos indicado por el texto (up to N / hasta N); Coordinate queda limitado a 1 salvo que el texto indique otra cosa.
+- Las unidades unidas se activan juntas y cuentan como un grupo.
+- Al finalizar las activaciones de ambos jugadores, la ronda queda en estado PUNTUACION y exige registrar puntos de objetivo principal y secundario antes de pasar a la siguiente ronda.
+- Se guarda el puntaje por ronda y se muestra el acumulado en el Companion y el reporte final.
+- Una vez elegidas ambas listas, los selectores de listas desaparecen y quedan bloqueados para evitar cambios accidentales.
+- Las listas pueden provenir de Ejercitos, JSON Army Forge o Campanas.
+- Se conserva SIN ATAQUE, multiples objetivos y multiples ataques contra el mismo objetivo.
+- Deteccion de habilidades de activacion busca reglas, habilidades, hechizos, upgrades, gains/content y snapshots de Army Forge.
+- Se mantiene compatibilidad web con DocumentPicker/fetch y BackHandler condicional.

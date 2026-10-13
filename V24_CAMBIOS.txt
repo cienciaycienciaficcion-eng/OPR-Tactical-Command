@@ -1,0 +1,5 @@
+V24 - Ajustes visuales
+- BrandingHeader: logos en una sola fila, OPR izquierda y Tucuman Wargames circular a la derecha.
+- Eliminado el encabezado nativo duplicado de las pestañas para recuperar espacio vertical.
+- Fondos de sección reforzados y con mayor visibilidad.
+- Mantiene la estructura y funcionalidades de V23.

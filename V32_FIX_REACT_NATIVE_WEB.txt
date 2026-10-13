@@ -1,0 +1,6 @@
+V32 - FIX ERROR "Unexpected text node: ." EN UTILIDADES / BATTLE COMPANION
+
+- Se reestructuró el render del panel Battle Companion para evitar ternarios JSX complejos directamente como hijos del View.
+- La selección de listas ahora usa condiciones JSX separadas (&&), evitando que una rama pueda producir accidentalmente un valor primitivo como hijo del View.
+- Se mantienen las funciones de Battle Companion de V31: activaciones alternadas, sin ataque, múltiples ataques al mismo objetivo y activaciones adicionales por habilidades/hechizos.
+- No se modificó la lógica de Ejércitos, Campaña ni Upgrades de V29.

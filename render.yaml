@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: opr-tactical-command-api
+    runtime: python
+    plan: free
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: GITHUB_APP_ID
+        sync: false
+      - key: GITHUB_CLIENT_ID
+        sync: false
+      - key: GITHUB_APP_PRIVATE_KEY
+        sync: false
+      - key: APP_SESSION_SECRET
+        generateValue: true
+      - key: GITHUB_OWNER
+        value: cienciaycienciaficcion-eng
+      - key: GITHUB_REPO
+        value: OPR-Tactical-Command
+      - key: CORS_ORIGINS
+        value: '*'
