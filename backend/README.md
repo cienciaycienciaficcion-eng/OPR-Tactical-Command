@@ -1,35 +1,44 @@
-# OPR Tactical Command API
+# OPR Tactical Command API — cuentas por invitación
 
-Backend inicial para autenticar usuarios con GitHub Device Flow y guardar ejércitos/reportes en el repositorio central usando una GitHub App installation token.
+## Requisitos nuevos de producción
 
-## Variables de entorno
+Configurar en Render:
+- `DATABASE_URL`: URL interna/externa de una base PostgreSQL de Render.
+- `ADMIN_API_TOKEN`: secreto aleatorio largo para emitir invitaciones desde el endpoint administrativo.
+- Mantener `GITHUB_APP_ID`, `GITHUB_CLIENT_ID`, `GITHUB_APP_PRIVATE_KEY`, `APP_SESSION_SECRET`, `GITHUB_OWNER` y `GITHUB_REPO`.
 
-- `GITHUB_APP_ID`: App ID público de GitHub App.
-- `GITHUB_CLIENT_ID`: Client ID público de GitHub App; Device Flow debe estar habilitado en los ajustes de la app.
-- `GITHUB_APP_PRIVATE_KEY`: contenido completo del `.pem`, guardado como secreto en el servicio de hosting. Nunca se añade al repositorio ni a la APK.
-- `APP_SESSION_SECRET`: secreto aleatorio largo para firmar sesiones propias del backend.
-- `GITHUB_OWNER`: `cienciaycienciaficcion-eng`.
-- `GITHUB_REPO`: `OPR-Tactical-Command`.
+**No despliegues el nuevo backend hasta haber creado PostgreSQL y configurado ambas variables nuevas.** Las tablas se crean al arrancar. `APP_SESSION_SECRET` debe ser un secreto aleatorio y nunca debe publicarse.
+
+## Flujo de registro
+
+1. Un administrador emite una invitación con `POST /admin/invitations`, enviando `Authorization: Bearer <ADMIN_API_TOKEN>` y, por ejemplo, `{"expires_in_hours":168,"max_uses":1,"note":"Liga"}`.
+2. Se entrega el código de invitación al jugador por un canal privado. Se guarda únicamente un hash del código en PostgreSQL.
+3. La app inicia `POST /auth/device/start` y abre la URL de GitHub para que el usuario autorice Device Flow.
+4. Durante `POST /auth/device/poll`, la app envía `{"device_code":"...","invite_code":"OPR-..."}`. Una cuenta nueva sin invitación no recibe sesión. La invitación se valida y consume una sola vez (o hasta `max_uses`), y se crea el perfil.
+5. `GET /api/me` devuelve el perfil y `PATCH /api/me` cambia el nombre visible.
+6. Las sesiones expiran a las 12 horas.
+
+## Ejércitos y privacidad
+
+- `POST /api/armies` guarda los datos privados en PostgreSQL; **no** los publica en GitHub.
+- `GET /api/armies` lista los ejércitos del usuario autenticado.
+- `GET /api/armies/{id}` permite ver el propio ejército; las copias compartidas también son consultables por usuarios autenticados.
+- `PATCH /api/armies/{id}/sharing` con `{"shared":true}` publica una copia en `ejercitos-compartidos/` del repositorio central. Ese repositorio debe considerarse público: la acción hace que los datos sean públicamente visibles.
+- Con `{"shared":false}` se intenta borrar la copia actual del repositorio y se vuelve a marcar privada en PostgreSQL. No se puede garantizar la eliminación de copias, forks, cachés o clones ya descargados.
+- `GET /api/armies/shared` lista los ejércitos compartidos.
 
 ## Endpoints
 
-- `GET /health`
-- `GET /api/config`
-- `POST /auth/device/start` -> entrega el código de usuario y la URL de autorización.
-- `POST /auth/device/poll` -> consulta la autorización; al finalizar entrega una sesión de la API (no devuelve el token OAuth de GitHub).
-- `POST /api/armies` -> requiere `Authorization: Bearer <session_token>`; guarda `ejercitos/<login>/...json`.
-- `POST /api/battles` -> requiere sesión; guarda un archivo de batalla en `batallas/<año>/...json`.
+- `GET /health`, `GET /health/database`, `GET /api/config`
+- `POST /auth/device/start`
+- `POST /auth/device/poll`
+- `POST /admin/invitations`
+- `GET /api/me`, `PATCH /api/me`
+- `POST /api/armies`, `GET /api/armies`, `GET /api/armies/{army_id}`
+- `PATCH /api/armies/{army_id}/sharing`
+- `GET /api/armies/shared`
+- `POST /api/battles` (mantiene la escritura de informes de batalla en el repositorio central)
 
-## Despliegue desde GitHub
+## Nota sobre la app móvil
 
-El archivo `render.yaml` de la raíz del repositorio es un Blueprint para desplegar el servicio desde un repositorio conectado a Render. GitHub Actions no puede actuar como servidor HTTP permanente, por lo que hace falta un servicio web para que la APK pueda conectarse cuando quiera.
-
-En Render, al crear el Blueprint, configurar `GITHUB_APP_ID=5300354`, el Client ID mostrado en GitHub y el contenido de la clave `.pem` en las variables secretas. No guardar la clave privada en GitHub ni en el ZIP de la APK.
-
-## Importante: instalación y permisos
-
-La GitHub App debe estar instalada en `cienciaycienciaficcion-eng/OPR-Tactical-Command` y tener `Contents: Read and write`. Device Flow debe estar habilitado. El usuario que inicia sesión no necesita ser colaborador: el backend escribe con el token de instalación de la App.
-
-## Estado de esta entrega
-
-Es una base inicial de backend. No desplegar a producción sin pruebas de autenticación, permisos, límites, control de abuso y concurrencia. Los reportes se guardan como archivos individuales; la actualización de `batallas/historial-general.json` se deja para un workflow separado que pueda consolidar archivos sin carreras entre subidas simultáneas.
+El ZIP de repositorio recibido contiene configuración Expo y backend, pero no contiene `app/`, `src/` ni componentes de interfaz de la app. Por tanto, este paquete actualiza el backend y su documentación, pero no puede integrar todavía las pantallas móviles de invitación, edición de perfil o compartir ejército. La app debe enviar `invite_code` en el cuerpo de `POST /auth/device/poll` para completar el alta de usuarios nuevos.
